@@ -1,5 +1,6 @@
 import ItemsTemplate from "./items"
 import Summary from "./summary"
+import DigitalSummary from "./digital-summary"
 import EmptyCartMessage from "../components/empty-cart-message"
 import SignInPrompt from "../components/sign-in-prompt"
 import Divider from "@modules/common/components/divider"
@@ -8,9 +9,13 @@ import { HttpTypes } from "@medusajs/types"
 const CartTemplate = ({
   cart,
   customer,
+  isDigitalEligible = false,
+  totalAccessDays = 0,
 }: {
   cart: HttpTypes.StoreCart | null
   customer: HttpTypes.StoreCustomer | null
+  isDigitalEligible?: boolean
+  totalAccessDays?: number
 }) => {
   return (
     <div className="py-12">
@@ -31,7 +36,15 @@ const CartTemplate = ({
                 {cart && cart.region && (
                   <>
                     <div className="bg-white py-6">
-                      <Summary cart={cart as any} />
+                      {isDigitalEligible ? (
+                        <DigitalSummary 
+                          cart={cart as any} 
+                          isDigitalEligible={isDigitalEligible}
+                          totalAccessDays={totalAccessDays}
+                        />
+                      ) : (
+                        <Summary cart={cart as any} />
+                      )}
                     </div>
                   </>
                 )}
