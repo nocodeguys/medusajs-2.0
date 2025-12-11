@@ -18,7 +18,7 @@ export default async function debugShipping({ container }: ExecArgs) {
   for (const p of products) {
     logger.info(`   - ${p.title}`);
     logger.info(`     handle: ${p.handle}`);
-    logger.info(`     shipping_profile_id: ${p.shipping_profile_id || "NONE"}`);
+    logger.info(`     shipping_profile_id: ${(p as any).shipping_profile_id || "NONE"}`);
   }
 
   // List shipping profiles

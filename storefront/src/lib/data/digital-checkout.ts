@@ -169,13 +169,14 @@ export async function prepareDigitalCheckout(input: DigitalCheckoutInput) {
 /**
  * Sets digital checkout billing address and email on cart
  * Uses the standard Medusa cart update but with minimal address
+ * Also automatically sets shipping method and initializes payment session
  */
 export async function setDigitalCheckoutInfo(
   currentState: unknown,
   formData: FormData
 ) {
   try {
-    const cartId = getCartId()
+    const cartId = await getCartId()
     if (!cartId) {
       throw new Error("No cart found")
     }
@@ -218,6 +219,35 @@ export async function setDigitalCheckoutInfo(
         vat_number: vatNumber || null
       }
     })
+
+    // Auto-set shipping method for digital products
+    try {
+      await setDigitalShippingMethod()
+    } catch (shippingError: any) {
+      console.log("[Digital Checkout] Shipping method error:", shippingError.message)
+      // Continue even if shipping fails - might already be set
+    }
+
+    // Auto-initialize payment session with first available provider
+    try {
+      const cart = await retrieveCart()
+      if (cart && !cart.payment_collection?.payment_sessions?.length) {
+        // Get available payment providers for the region
+        const { payment_providers } = await sdk.store.payment.listPaymentProviders(
+          { region_id: cart.region_id! }
+        )
+        
+        if (payment_providers?.length) {
+          // Initialize with first available provider (usually Stripe)
+          await initiatePaymentSession(cart, {
+            provider_id: payment_providers[0].id,
+          })
+        }
+      }
+    } catch (paymentError: any) {
+      console.log("[Digital Checkout] Payment init error:", paymentError.message)
+      // Continue even if payment init fails - user can retry
+    }
 
     revalidateTag("cart")
     return { success: true }

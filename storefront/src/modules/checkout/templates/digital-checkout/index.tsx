@@ -6,7 +6,7 @@ import { Heading, Text } from "@medusajs/ui"
 import { convertToLocale } from "@lib/util/money"
 import Divider from "@modules/common/components/divider"
 import DigitalCheckoutForm from "@modules/checkout/components/digital-checkout-form"
-import PaymentButton from "@modules/checkout/components/payment-button"
+import DigitalPaymentSection from "@modules/checkout/components/digital-payment-section"
 import Thumbnail from "@modules/products/components/thumbnail"
 
 interface DigitalCheckoutValidation {
@@ -66,16 +66,7 @@ export default function DigitalCheckoutTemplate({
             {isInfoComplete && (
               <div className="bg-white">
                 <Heading level="h2" className="text-3xl-regular mb-6">Complete Purchase</Heading>
-                {paymentMethods?.length === 0 ? (
-                  <Text className="text-ui-fg-muted">No payment methods available.</Text>
-                ) : (
-                  <div className="space-y-4">
-                    <Text className="text-ui-fg-subtle text-sm">
-                      By completing this purchase, you agree to our Terms of Service.
-                    </Text>
-                    <PaymentButton cart={cart} data-testid="submit-order-button" />
-                  </div>
-                )}
+                <DigitalPaymentSection cart={cart} availablePaymentMethods={paymentMethods} />
               </div>
             )}
 
